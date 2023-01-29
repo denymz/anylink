@@ -156,7 +156,7 @@ func userOtpQr(uid int, b64 bool) (string, error) {
 	}
 
 	issuer := url.QueryEscape(base.Cfg.Issuer)
-	qrstr := fmt.Sprintf("otpauth://totp/%s:%s?issuer=%s&secret=%s", issuer, user.Email, issuer, user.OtpSecret)
+	qrstr := fmt.Sprintf("otpauth://totp/%s?issuer=%s&secret=%s", user.Email, issuer, user.OtpSecret)
 	qr, _ := qrcode.New(qrstr, qrcode.High)
 
 	if b64 {

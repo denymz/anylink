@@ -91,6 +91,18 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		tplRequest(tpl_request, w, data)
 		return
 	}
+	// 检查单用户客户端连接数量
+	if !sessdata.CheckLimit(cr.Auth.Username){
+		base.Warn("用户连接数超出限制")
+		ua.Info = "用户连接数超出限制"
+		ua.Status = dbdata.UserAuthFail
+		dbdata.UserActLogIns.Add(ua, userAgent)
+
+		w.WriteHeader(http.StatusOK)
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户连接数超出限制"}
+		tplRequest(tpl_request, w, data)
+		return
+ 	}
 	dbdata.UserActLogIns.Add(ua, userAgent)
 	// if !ok {
 	//	w.WriteHeader(http.StatusOK)
@@ -185,9 +197,9 @@ var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
         <error id="88" param1="{{.Error}}" param2="">登陆失败:  %s</error>
         {{end}}
         <form>
-            <input type="text" name="username" label="Username:"></input>
-            <input type="password" name="password" label="Password:"></input>
-            <select name="group_list" label="GROUP:">
+            <input type="text" name="username" label="用户名:"></input>
+            <input type="password" name="password" label="密码:"></input>
+            <select name="group_list" label="用户组:">
                 {{range $v := .Groups}}
                 <option {{if eq $v $.Group}} selected="true"{{end}}>{{$v}}</option>
                 {{end}}
